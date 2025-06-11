@@ -9,7 +9,7 @@ interface FileInputProps {
 
 export default function FileInput({ label, name }: FileInputProps) {
   const { setFieldValue } = useFormikContext();
-  const [field, meta] = useField(name);
+  const [, meta] = useField(name);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;

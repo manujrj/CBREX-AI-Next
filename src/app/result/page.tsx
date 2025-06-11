@@ -7,12 +7,13 @@ import Header from "../../components/Header";
 import Modal from "../../components/Modal";
 
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { Candidate, ResumeAnalysis } from "@/types/matching";
 
 export default function ResultPage() {
   const router = useRouter();
   const initialData = useAppSelector((state) => state.result.data);
   const formDataState = useAppSelector((state) => state.result.formData);
-  const [candidates, setCandidates] = useState<any[]>(
+  const [candidates, setCandidates] = useState<ResumeAnalysis[]>(
     initialData ? [initialData.best_resume] : []
   );
   const [isUploading, setIsUploading] = useState(false);
@@ -28,9 +29,12 @@ export default function ResultPage() {
     input.type = "file";
     input.accept = ".pdf,.doc,.docx";
 
-    input.onchange = async (e: any) => {
-      const file = e.target.files[0];
-      if (!file) return;
+    input.onchange = async (e: Event) => {
+      const target = e.target;
+      if (!(target instanceof HTMLInputElement) || !target.files?.[0]) return;
+
+      const file = target.files[0];
+
       if (!formDataState) {
         alert("Form data missing");
         return;
@@ -38,7 +42,7 @@ export default function ResultPage() {
 
       setIsUploading(true);
       const formData = new FormData();
-      formData.append("jobDescription", "");
+      formData.append("jobDescription", ""); // If JD is not required again
       formData.append("sourcingGuideline", formDataState.sourcingGuideline);
       formData.append("email", formDataState.email);
       formData.append("resume", file);
@@ -49,8 +53,14 @@ export default function ResultPage() {
           body: formData,
         });
 
+        if (!response.ok) throw new Error("Upload failed");
+
         const result = await response.json();
-        setCandidates((prev) => [...prev, result.best_resume]);
+        if (result?.best_resume) {
+          setCandidates((prev) => [...prev, result.best_resume]);
+        } else {
+          console.warn("Unexpected response:", result);
+        }
       } catch (err) {
         console.error("Error uploading:", err);
       } finally {
@@ -69,9 +79,9 @@ export default function ResultPage() {
   };
 
   // combine detailed description into insight string
-  const buildInsight = (descriptionObj: any): string => {
+  const buildInsight = (descriptionObj: Candidate): string => {
     let combined = "";
-    for (const key in descriptionObj) {
+    for (const key of Object.keys(descriptionObj) as (keyof Candidate)[]) {
       combined += `<strong>${key.replace(/_/g, " ")}:</strong> ${
         descriptionObj[key]
       }<br>`;
