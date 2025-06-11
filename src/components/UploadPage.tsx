@@ -19,19 +19,19 @@ export default function UploadPage() {
   const router = useRouter();
 
   const validationSchema = Yup.object({
-    jobDescription: Yup.string().required("Required"),
+    jobDescription: Yup.mixed<File>().required("Required"),
     sourcingGuideline: Yup.string().required("Required"),
     email: Yup.string().email("Invalid email").required("Required"),
-    resume: Yup.mixed<File>().required("Resume file required"),
+    resume: Yup.mixed<File>().required("Required"),
   });
 
   const handleSubmit = async (values: {
-    jobDescription: string;
+    jobDescription: File | null;
     sourcingGuideline: string;
     email: string;
     resume: File | null;
   }) => {
-    if (!values.resume) return;
+    if (!values.resume || !values.jobDescription) return;
 
     const formData = new FormData();
     formData.append("jobDescription", values.jobDescription);
@@ -44,7 +44,6 @@ export default function UploadPage() {
     dispatch(setResult(response));
     dispatch(
       setFormData({
-        jobDescription: values.jobDescription,
         sourcingGuideline: values.sourcingGuideline,
         email: values.email,
       })
@@ -89,7 +88,7 @@ export default function UploadPage() {
           <div className="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-lg drop-shadow-md w-full max-w-lg">
             <Formik
               initialValues={{
-                jobDescription: "",
+                jobDescription: null,
                 sourcingGuideline: "",
                 email: "",
                 resume: null,
@@ -99,14 +98,8 @@ export default function UploadPage() {
             >
               {({ handleSubmit }) => (
                 <Form onSubmit={handleSubmit} className="space-y-5">
-                  <TextareaInput
-                    label="Job Description"
-                    name="jobDescription"
-                  />
-                  <TextareaInput
-                    label="Sourcing Guideline"
-                    name="sourcingGuideline"
-                  />
+                  <FileInput label="Job Description" name="jobDescription" />
+                  <TextareaInput label="Must Haves" name="sourcingGuideline" />
                   <TextInput label="Email" name="email" type="email" />
                   <FileInput label="Resume" name="resume" />
 

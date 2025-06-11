@@ -1,10 +1,9 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import type { MatchingResponse } from "@/types/matching";
 
 export interface ResultState {
   data: MatchingResponse | null;
   formData: {
-    jobDescription: string;
     sourcingGuideline: string;
     email: string;
   } | null;
