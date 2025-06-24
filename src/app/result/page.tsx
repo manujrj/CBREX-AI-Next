@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/lib/client/hooks";
 import Header from "../../components/Header";
 import Modal from "../../components/Modal";
-
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { Candidate, ResumeAnalysis } from "@/types/matching";
+import jsPDF from "jspdf";
 
 export default function ResultPage() {
   const router = useRouter();
@@ -42,7 +42,7 @@ export default function ResultPage() {
 
       setIsUploading(true);
       const formData = new FormData();
-      formData.append("jobDescription", ""); // If JD is not required again
+      formData.append("jobDescription", "");
       formData.append("sourcingGuideline", formDataState.sourcingGuideline);
       formData.append("email", formDataState.email);
       formData.append("resume", file);
@@ -78,7 +78,6 @@ export default function ResultPage() {
     }));
   };
 
-  // combine detailed description into insight string
   const buildInsight = (descriptionObj: Candidate): string => {
     let combined = "";
     for (const key of Object.keys(descriptionObj) as (keyof Candidate)[]) {
@@ -89,12 +88,14 @@ export default function ResultPage() {
     return combined;
   };
 
-  const getPreviewText = (htmlText: string, expanded: boolean) => {
-    const text = htmlText.replace(/<br\s*\/?>/gi, "\n");
-    if (expanded) return text;
-    const lines = text.split("\n");
-    if (lines.length <= 3) return text;
-    return lines.slice(0, 3).join("\n") + "...";
+  const getPreviewText = (htmlText: string, expanded: boolean): string => {
+    if (expanded) return htmlText;
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = htmlText;
+    const listItems = Array.from(tempDiv.querySelectorAll("li")).slice(0, 2);
+    const limitedUl = document.createElement("ul");
+    listItems.forEach((li) => limitedUl.appendChild(li.cloneNode(true)));
+    return limitedUl.outerHTML;
   };
 
   const handleCFitClick = async () => {
@@ -129,6 +130,118 @@ export default function ResultPage() {
       console.error("C-Fit error:", error);
       setCfitResponse("Error fetching C-Fit data");
     }
+  };
+
+  const htmlToPlainTextInsight = (html: string): string => {
+    const cleanedHtml = html.replace(/&#\d+;/g, "");
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = cleanedHtml;
+
+    const bullets: string[] = [];
+    const sections = tempDiv.querySelectorAll("ul");
+
+    sections.forEach((ul, sectionIndex) => {
+      let sectionTitle = `Section ${sectionIndex + 1}`;
+      const maybeTitle = ul.previousElementSibling;
+
+      if (maybeTitle) {
+        const strong = maybeTitle.querySelector("strong");
+        sectionTitle = (
+          strong?.textContent ||
+          maybeTitle.textContent ||
+          sectionTitle
+        ).trim();
+      }
+
+      bullets.push(`${sectionTitle}:`);
+      ul.querySelectorAll("li").forEach((li) => {
+        const text = li.textContent?.trim().replace(/\s+/g, " ") || "";
+        bullets.push(`• ${text}`);
+      });
+
+      bullets.push("");
+    });
+    return bullets.join("\n");
+  };
+
+  const downloadPDF = (resume: ResumeAnalysis) => {
+    const { candidate_name, percentage_match, detailed_description } = resume;
+
+    const name = candidate_name ?? "Unnamed";
+    const score =
+      percentage_match !== undefined ? `${percentage_match}%` : "N/A";
+
+    const htmlInsight = buildInsight(detailed_description ?? {});
+    const plainInsight =
+      htmlToPlainTextInsight(htmlInsight) || "No insight available.";
+
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "pt",
+      format: "a4",
+    });
+    const margin = 40;
+    const maxWidth = 515;
+    let cursorY = 60;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Resume Insight Report", margin, cursorY);
+    cursorY += 30;
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Candidate Name: ${name}`, margin, cursorY);
+    cursorY += 20;
+
+    doc.text(`AI Score: ${score}`, margin, cursorY);
+    cursorY += 30;
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Insight:", margin, cursorY);
+    cursorY += 20;
+
+    doc.setFont("helvetica", "normal");
+
+    const sections = plainInsight.split("\n\n"); // Split by double newlines (each section)
+
+    for (const section of sections) {
+      const lines = section.split("\n");
+      if (lines.length === 0) continue;
+
+      const title = lines[0]; // e.g., "Skills Vs Experience Check::"
+      const bullets = lines.slice(1);
+
+      // Section title
+      doc.setFont("helvetica", "bold");
+      const wrappedTitle = doc.splitTextToSize(title, maxWidth);
+      for (const line of wrappedTitle) {
+        if (cursorY >= 800) {
+          doc.addPage();
+          cursorY = 60;
+        }
+        doc.text(line, margin, cursorY);
+        cursorY += 16;
+      }
+
+      // Bullets
+      doc.setFont("helvetica", "normal");
+      for (const bullet of bullets) {
+        const wrapped = doc.splitTextToSize(bullet, maxWidth);
+        for (const line of wrapped) {
+          if (cursorY >= 800) {
+            doc.addPage();
+            cursorY = 60;
+          }
+          doc.text(line, margin, cursorY);
+          cursorY += 16;
+        }
+      }
+
+      cursorY += 10; // Spacing between sections
+    }
+
+    doc.save(`${name.replace(/\s+/g, "_")}_insight.pdf`);
   };
 
   return (
@@ -196,6 +309,9 @@ export default function ResultPage() {
                 <th className="w-8/12 p-3 text-left text-gray-700 dark:text-gray-300 align-top">
                   Insight
                 </th>
+                <th className="w-1/12 p-3 text-left text-gray-700 dark:text-gray-300 align-top">
+                  Download
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -207,6 +323,7 @@ export default function ResultPage() {
                   insightRaw,
                   expandedRows[index]
                 );
+                const liCount = (insightRaw.match(/<li>/g) || []).length;
 
                 return (
                   <tr
@@ -221,7 +338,7 @@ export default function ResultPage() {
                     </td>
                     <td className="p-3 text-gray-800 dark:text-gray-200 align-top whitespace-pre-wrap">
                       <div dangerouslySetInnerHTML={{ __html: previewText }} />
-                      {insightRaw.split("<br>").length > 2 && (
+                      {liCount > 2 && (
                         <button
                           className="text-blue-500 text-sm mt-2"
                           onClick={() => toggleExpand(index)}
@@ -229,6 +346,15 @@ export default function ResultPage() {
                           {expandedRows[index] ? "See Less" : "See More"}
                         </button>
                       )}
+                    </td>
+                    <td className="p-3 text-gray-800 dark:text-gray-200 align-top">
+                      <button
+                        onClick={() => downloadPDF(resume)}
+                        className="hover:text-blue-600"
+                        title=""
+                      >
+                        <ArrowDownTrayIcon className="h-5 w-5" />
+                      </button>
                     </td>
                   </tr>
                 );
