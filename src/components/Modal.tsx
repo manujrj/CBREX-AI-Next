@@ -8,6 +8,7 @@ type ModalProps = {
   title?: string;
   children: ReactNode;
   loading?: boolean;
+  size?: "small" | "medium" | "large";
 };
 
 export default function Modal({
@@ -16,14 +17,28 @@ export default function Modal({
   title,
   children,
   loading = false,
+  size = "medium",
 }: ModalProps) {
   if (!isOpen) return null;
 
+  const getSizeClass = (size?: "small" | "medium" | "large") => {
+    switch (size) {
+      case "small":
+        return "max-w-md";
+      case "medium":
+        return "max-w-2xl";
+      case "large":
+        return "max-w-4xl";
+      default:
+        return "max-w-lg";
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-5xl w-full relative max-h-[80vh] overflow-y-auto">
+      <div className={`bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full relative ${getSizeClass(size)} overflow-y-auto`}>
         <button
-          className="absolute top-2 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-white"
+          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-white font-semibold"
           onClick={onClose}
         >
           ✕

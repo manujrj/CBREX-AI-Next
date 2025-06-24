@@ -10,6 +10,7 @@ export interface ResumeAnalysis {
   candidate_name: string;
   percentage_match: string;
   detailed_description: Candidate;
+  AI_Response_Counter: number;
 }
 
 export interface MatchingResponse {

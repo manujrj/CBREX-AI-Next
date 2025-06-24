@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/lib/client/hooks";
 import Header from "../../components/Header";
@@ -14,15 +14,23 @@ export default function ResultPage() {
   const initialData = useAppSelector((state) => state.result.data);
   const formDataState = useAppSelector((state) => state.result.formData);
   const [candidates, setCandidates] = useState<ResumeAnalysis[]>(
-    initialData ? [initialData.best_resume] : []
+    initialData && initialData.best_resume.AI_Response_Counter <= 10
+      ? [initialData.best_resume]
+      : []
   );
   const [isUploading, setIsUploading] = useState(false);
   const [expandedRows, setExpandedRows] = useState<{ [key: number]: boolean }>(
     {}
   );
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [cfitResponse, setCfitResponse] = useState<string | null>(null);
+  const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (initialData && initialData.best_resume.AI_Response_Counter > 10) {
+      setIsLimitModalOpen(true);
+    }
+  }, [initialData]);
 
   const handleAddResume = async () => {
     const input = document.createElement("input");
@@ -57,6 +65,10 @@ export default function ResultPage() {
 
         const result = await response.json();
         if (result?.best_resume) {
+          if (result.best_resume.AI_Response_Counter > 10) {
+            setIsLimitModalOpen(true);
+            return;
+          }
           setCandidates((prev) => [...prev, result.best_resume]);
         } else {
           console.warn("Unexpected response:", result);
@@ -251,11 +263,31 @@ export default function ResultPage() {
         onClose={() => setIsModalOpen(false)}
         title="C-Fit"
         loading={!cfitResponse}
+        size="large"
       >
         <div
           className="text-gray-700 dark:text-gray-300"
           dangerouslySetInnerHTML={{ __html: cfitResponse || "" }}
         />
+      </Modal>
+
+      <Modal
+        isOpen={isLimitModalOpen}
+        onClose={() => setIsLimitModalOpen(false)}
+        title="Request Limit Exceeded"
+        size="small"
+      >
+        <p className="text-gray-700 dark:text-gray-300">
+          The request limit for this user has been exceeded. <br />
+          Please contact us at{" "}
+          <a
+            href="mailto:sarvar@cbr.exchange"
+            className="text-blue-600 hover:underline"
+          >
+            sarvar@cbr.exchange
+          </a>{" "}
+          for further assistance.
+        </p>
       </Modal>
 
       <Header />
