@@ -314,7 +314,7 @@ const ResumeScreeningTool: React.FC = () => {
               Upload a Job Description, add your Sourcing Guidelines, and upload
               resumes to let C-Screen handle the rest.
             </p>
-            <p className="text-[#F1652E] text-sm">(Max: 10 Resumes)</p>
+            <p className="text-[#F1652E] text-sm">(Max. 10 Resumes)</p>
           </div>
 
           <Formik
