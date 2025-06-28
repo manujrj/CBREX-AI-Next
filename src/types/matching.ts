@@ -11,6 +11,7 @@ export interface ResumeAnalysis {
   percentage_match: string;
   detailed_description: Candidate;
   AI_Response_Counter: number;
+  'C-Screen Analysis': string;
 }
 
 export interface MatchingResponse {

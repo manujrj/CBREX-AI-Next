@@ -4,8 +4,8 @@ import type { MatchingResponse } from "@/types/matching";
 export interface ResultState {
   data: MatchingResponse | null;
   formData: {
+    jobTitle: string;
     sourcingGuideline: string;
-    email: string;
   } | null;
 }
 
