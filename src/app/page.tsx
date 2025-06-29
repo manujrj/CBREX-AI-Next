@@ -41,6 +41,10 @@ export default function Home() {
             name: Yup.string().required("Name is required"),
             email: Yup.string()
               .email("Invalid email")
+              .matches(
+                /^(?![\w.-]+@(gmail|yahoo|outlook|hotmail|aol|icloud|protonmail|mail|gmx|yandex|rediffmail|live|msn|ymail|rocketmail|me)\.[a-zA-Z]{2,}$).+$/,
+                "Only official email is allowed"
+              )
               .required("Email is required"),
           })}
           onSubmit={(values) => {
