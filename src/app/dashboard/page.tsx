@@ -17,7 +17,7 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] text-black dark:text-white bg-gray-50 dark:bg-[#1A1B24] p-6 overflow-hidden box-border transition-colors duration-300">
+    <div className="min-h-[calc(100vh-5rem)] text-black dark:text-white bg-gray-50 dark:bg-[#1A1B24] p-8 overflow-hidden box-border transition-colors duration-300">
       {/* Main Content */}
       <div className="max-w-6xl mx-auto h-full overflow-y-auto">
         {/* Welcome Section */}
@@ -33,34 +33,34 @@ const DashboardPage = () => {
         {/* Tool Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {/* C-Screen Card */}
-          <div className="bg-white dark:bg-[#2A2B34] border-2 border-[#F1652E] rounded-lg py-6 px-10 hover:border-[#FF7A47] hover:shadow-lg hover:shadow-[#F1652E]/20 hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col h-full shadow-sm">
-            <div className="flex items-center mb-4">
-              <div className="rounded-lg p-3 mr-2">
+          <div className="bg-[#1A1B24] border-2 border-[#F1652E] rounded-lg p-10 hover:border-[#FF7A47] hover:shadow-lg hover:shadow-[#F1652E]/20 hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col h-full shadow-sm gap-6">
+            <div className="flex items-center">
+              <div className="rounded-lg mr-2">
                 <Image
                   src="/c-screen-pn.png"
                   alt="C-Screen"
-                  width={50}
-                  height={50}
+                  width={62}
+                  height={62}
                 />
               </div>
               <h3 className="text-xl font-semibold text-[#F1652E]">C-Screen</h3>
             </div>
 
-            <p className="text-gray-600 dark:text-gray-300 mb-6 font-medium">
+            <p className="text-gray-300 font-medium">
               AI-Powered Resume Screening
             </p>
 
-            <ul className="space-y-3 mb-8 text-sm text-gray-600 dark:text-gray-300 flex-grow font-medium">
+            <ul className="space-y-3 text-sm text-gray-300 flex-grow font-medium list-disc">
               <li className="flex items-start">
-                <span className="text-[#F1652E] mr-2">•</span>
+                <span className="mr-2">•</span>
                 Upload & screen resumes instantly
               </li>
               <li className="flex items-start">
-                <span className="text-[#F1652E] mr-2">•</span>
+                <span className="mr-2">•</span>
                 Get C-Screen insights & Scores for each candidate
               </li>
               <li className="flex items-start">
-                <span className="text-[#F1652E] mr-2">•</span>
+                <span className="mr-2">•</span>
                 Save time with automated shortlist suggestions
               </li>
             </ul>
@@ -77,30 +77,30 @@ const DashboardPage = () => {
           </div>
 
           {/* C-Prompt Card */}
-          <div className="bg-white dark:bg-[#2A2B34] border-2 border-[#F1652E] rounded-lg py-6 px-10 hover:border-[#FF7A47] hover:shadow-lg hover:shadow-[#F1652E]/20 hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col h-full shadow-sm">
-            <div className="flex items-center mb-4">
-              <div className="rounded-lg p-3 mr-2">
+          <div className="bg-[#1A1B24] border-2 border-[#F1652E] rounded-lg p-10 hover:border-[#FF7A47] hover:shadow-lg hover:shadow-[#F1652E]/20 hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col h-full shadow-sm gap-6">
+            <div className="flex items-center">
+              <div className="rounded-lg mr-2">
                 <Image
                   src="/c-prompt.png"
                   alt="C-Prompt"
-                  width={50}
-                  height={50}
+                  width={62}
+                  height={62}
                 />
               </div>
               <h3 className="text-xl font-semibold text-[#F1652E]">C-Prompt</h3>
             </div>
 
-            <p className="text-gray-600 dark:text-gray-300 mb-6 font-medium">
+            <p className="text-gray-300 font-medium">
               AI Powered Market Analysis
             </p>
 
-            <ul className="space-y-3 mb-8 text-sm text-gray-600 dark:text-gray-300 flex-grow font-medium">
+            <ul className="space-y-3 text-sm text-gray-300 flex-grow font-medium">
               <li className="flex items-start">
-                <span className="text-[#F1652E] mr-2">•</span>
+                <span className="mr-2">•</span>
                 Access market intel using AI
               </li>
               <li className="flex items-start">
-                <span className="text-[#F1652E] mr-2">•</span>
+                <span className="mr-2">•</span>
                 Generate search strings & Boolean logic for recruiters
               </li>
             </ul>
@@ -118,29 +118,29 @@ const DashboardPage = () => {
           </div>
 
           {/* C-Fit Card */}
-          <div className="bg-white dark:bg-[#2A2B34] border-2 border-[#F1652E] rounded-lg py-6 px-10 hover:border-[#FF7A47] hover:shadow-lg hover:shadow-[#F1652E]/20 hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col h-full shadow-sm">
-            <div className="flex items-center mb-4">
-              <div className="rounded-lg p-3 mr-2">
-                <Image src="/c-fit.png" alt="C-Fit" width={50} height={50} />
+          <div className="bg-[#1A1B24] border-2 border-[#F1652E] rounded-lg p-10 hover:border-[#FF7A47] hover:shadow-lg hover:shadow-[#F1652E]/20 hover:-translate-y-1 transition-all duration-300 ease-in-out flex flex-col h-full shadow-sm gap-6">
+            <div className="flex items-center">
+              <div className="rounded-lg mr-2">
+                <Image src="/c-fit.png" alt="C-Fit" width={62} height={62} />
               </div>
               <h3 className="text-xl font-semibold text-[#F1652E]">C-Fit</h3>
             </div>
 
-            <p className="text-gray-600 dark:text-gray-300 mb-6 font-medium">
+            <p className="text-gray-300 font-medium">
               Candidate-Job Fit Predictor
             </p>
 
-            <ul className="space-y-3 mb-8 text-sm text-gray-600 dark:text-gray-300 flex-grow font-medium">
+            <ul className="space-y-3 text-sm text-gray-300 flex-grow font-medium">
               <li className="flex items-start">
-                <span className="text-[#F1652E] mr-2">•</span>
+                <span className="mr-2">•</span>
                 Generate skill based questions using AI
               </li>
               <li className="flex items-start">
-                <span className="text-[#F1652E] mr-2">•</span>
+                <span className="mr-2">•</span>
                 Assess candidate fitment
               </li>
               <li className="flex items-start">
-                <span className="text-[#F1652E] mr-2">•</span>
+                <span className="mr-2">•</span>
                 Improve quality-of-hire metrics
               </li>
             </ul>

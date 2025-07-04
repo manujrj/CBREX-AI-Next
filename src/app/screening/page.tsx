@@ -18,6 +18,7 @@ import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { setFormData, setResult } from "@/lib/client/resultSlice";
 import { useProcessMatchingMutation } from "@/lib/client/matchingApi";
 import PrecessingModal from "../components/PrecessingModal";
+import ResumeUploadError from "../components/ResumeUploadError";
 
 interface FileUpload {
   name: string;
@@ -43,6 +44,7 @@ const ResumeScreeningTool: React.FC = () => {
   const [processMatching, { isLoading, error }] = useProcessMatchingMutation();
   const router = useRouter();
   const [dragOver, setDragOver] = useState<DragOverType>(null);
+  const [isResumeUploadModalOpen, setIsResumeUploadModalOpen] = useState(false);
   const jobFileRef = useRef<HTMLInputElement>(null);
   const resumeFileRef = useRef<HTMLInputElement>(null);
   const [formError, setFormError] = useState<
@@ -66,7 +68,7 @@ const ResumeScreeningTool: React.FC = () => {
     sourcingGuidelines: "",
     resumeFile: null,
   };
-  
+
   const validationSchema = Yup.object({
     jobTitle: Yup.string()
       .required("Job title is required")
@@ -231,10 +233,17 @@ const ResumeScreeningTool: React.FC = () => {
     }
 
     const response = await processMatching(formData).unwrap();
-
-    dispatch(setResult(response));
     setIsProcessing(false);
-    router.push("/result");
+
+    if (
+      typeof response?.best_resume === "string" &&
+      response.best_resume?.toLowerCase().includes("error")
+    ) {
+      setIsResumeUploadModalOpen(true);
+    } else {
+      dispatch(setResult(response));
+      router.push("/result");
+    }
   };
 
   const validateAndSubmit = (
@@ -286,16 +295,23 @@ const ResumeScreeningTool: React.FC = () => {
   return (
     <>
       <PrecessingModal isOpen={isProcessing} />
-      <div className="min-h-screen bg-gray-50 dark:bg-[#1A1B24] text-gray-900 dark:text-white p-6 transition-colors duration-300">
-        <div className="mx-8">
+      <ResumeUploadError
+        isOpen={isResumeUploadModalOpen}
+        onClose={() => {
+          setIsResumeUploadModalOpen(false);
+          router.push("/result");
+        }}
+      />
+      <div className="min-h-screen bg-gray-50 dark:bg-[#1A1B24] text-gray-900 dark:text-white p-8 transition-colors duration-300">
+        <div>
           {/* Header */}
           <div className="flex items-center mb-8">
-            <div className="rounded-lg p-3 mr-2">
+            <div className="rounded-lg mr-2">
               <Image
                 src="/c-screen-pn.png"
                 alt="C-Screen"
-                width={60}
-                height={60}
+                width={72}
+                height={72}
               />
             </div>
             <div className="flex flex-col gap-1 ">
@@ -329,7 +345,7 @@ const ResumeScreeningTool: React.FC = () => {
               touched,
             }: FormikProps<FormValues>) => (
               <Form>
-                <div className="space-y-6 border border-gray-200 dark:border-gray-700 p-6">
+                <div className="space-y-6 border border-gray-200 dark:border-gray-700 p-6 rounded">
                   {/* Step 1: Upload Job Description */}
                   <div className="bg-white dark:bg-[#1A1B24] shadow-sm dark:shadow-none rounded-lg p-6 mb-6 transition-colors duration-300">
                     <h2 className="text-xl font-semibold mb-2">
@@ -337,7 +353,7 @@ const ResumeScreeningTool: React.FC = () => {
                     </h2>
                     <p className="text-gray-500 dark:text-gray-300 mb-4">
                       Upload a file or paste the job description to screen
-                      resumes against
+                      resumes against.
                     </p>
 
                     {/* Job Title Field */}
@@ -355,10 +371,10 @@ const ResumeScreeningTool: React.FC = () => {
                       <ErrorMessage
                         name="jobTitle"
                         component="div"
-                        className="text-red-500 text-sm mt-1"
+                        className="text-red-500 text-sm mt-2"
                       />
                       {formError.jobTitle && (
-                        <div className="text-red-500 text-sm mt-1">
+                        <div className="text-red-500 text-sm mt-2">
                           {formError.jobTitle}
                         </div>
                       )}
@@ -366,7 +382,7 @@ const ResumeScreeningTool: React.FC = () => {
 
                     {/* File Upload Area */}
                     <div
-                      className={`rounded-lg p-4 text-center transition-colors cursor-pointer mb-4 ${
+                      className={`rounded-lg py-4 text-center transition-colors cursor-pointer ${
                         dragOver === "job"
                           ? "border-[#F1652E] bg-[#F1652E]/5 dark:bg-[#F1652E]/10"
                           : errors.jobDescriptionFile &&
@@ -413,7 +429,7 @@ const ResumeScreeningTool: React.FC = () => {
                             </span>{" "}
                             or Drag and Drop
                           </p>
-                          <p className="text-gray-500 dark:text-gray-300 text-sm mb-4">
+                          <p className="text-gray-500 dark:text-gray-300 text-sm">
                             PDF, DOC, DOCX of up to 10 MB. Tables and images
                             will be ignored.
                           </p>
@@ -433,7 +449,7 @@ const ResumeScreeningTool: React.FC = () => {
 
                     {!values.jobDescriptionFile && (
                       <>
-                        <div className="text-center my-4">
+                        <div className="text-center mb-4">
                           <span className="text-gray-500 dark:text-gray-300">
                             Or
                           </span>
@@ -454,6 +470,13 @@ const ResumeScreeningTool: React.FC = () => {
                             />
                           )}
                         </Field>
+
+                        {!errors.jobDescriptionText &&
+                          formError.jobDescriptionText && (
+                            <div className="text-red-500 text-sm">
+                              {formError.jobDescriptionText}
+                            </div>
+                          )}
 
                         <div className="flex justify-end mt-2">
                           <div className="flex items-center gap-2 text-sm">
@@ -504,12 +527,6 @@ const ResumeScreeningTool: React.FC = () => {
                       className="text-red-500 text-sm mt-1"
                     />
                     {/* Only show custom error if ErrorMessage is not already present */}
-                    {!errors.jobDescriptionText &&
-                      formError.jobDescriptionText && (
-                        <div className="text-red-500 text-sm mt-1">
-                          {formError.jobDescriptionText}
-                        </div>
-                      )}
                   </div>
 
                   {/* Step 2: Add Sourcing Guidelines */}
@@ -532,24 +549,25 @@ const ResumeScreeningTool: React.FC = () => {
                             touched.sourcingGuidelines
                               ? "border-red-500"
                               : "border-gray-300 dark:border-gray-600"
-                          } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded px-3 py-3 h-32 resize-none focus:outline-none focus:border-[#F1652E] transition-colors mb-4`}
+                          } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded px-3 py-3 h-32 resize-none focus:outline-none focus:border-[#F1652E] transition-colors`}
                         />
                       )}
                     </Field>
 
-                    <ErrorMessage
-                      name="sourcingGuidelines"
-                      component="div"
-                      className="text-red-500 text-sm mb-4"
-                    />
                     {formError.sourcingGuidelines && (
-                      <div className="text-red-500 text-sm mb-2">
+                      <div className="text-red-500 text-sm">
                         {formError.sourcingGuidelines}
                       </div>
                     )}
 
+                    <ErrorMessage
+                      name="sourcingGuidelines"
+                      component="div"
+                      className="text-red-500 text-sm mt-2"
+                    />
+
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-300 mb-3">
+                      <p className="text-sm text-gray-500 dark:text-gray-300 mt-4 mb-3">
                         Suggested Guidelines
                       </p>
                       <div className="flex flex-wrap gap-2">
@@ -607,7 +625,7 @@ const ResumeScreeningTool: React.FC = () => {
                       </div>
                     ) : (
                       <div
-                        className={`rounded-lg p-4 text-center mb-4 transition-colors cursor-pointer ${
+                        className={`rounded-lg p-4 text-center transition-colors cursor-pointer ${
                           dragOver === "resume"
                             ? "border-[#F1652E] bg-[#F1652E]/5 dark:bg-[#F1652E]/10"
                             : errors.resumeFile && touched.resumeFile
@@ -643,7 +661,7 @@ const ResumeScreeningTool: React.FC = () => {
                       className="hidden"
                     />
 
-                    <button
+                    {/* <button
                       type="button"
                       onClick={() => resumeFileRef.current?.click()}
                       disabled={values.resumeFile !== null}
@@ -654,7 +672,7 @@ const ResumeScreeningTool: React.FC = () => {
                       }`}
                     >
                       Upload Resume
-                    </button>
+                    </button> */}
 
                     <ErrorMessage
                       name="resumeFile"
@@ -662,7 +680,7 @@ const ResumeScreeningTool: React.FC = () => {
                       className="text-red-500 text-sm mt-2"
                     />
                     {formError.resumeFile && (
-                      <div className="text-red-500 text-sm mt-2">
+                      <div className="text-red-500 text-sm">
                         {formError.resumeFile}
                       </div>
                     )}
