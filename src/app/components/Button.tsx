@@ -50,7 +50,9 @@ const Button: React.FC<ButtonProps> = ({
     lg: "px-6 py-3 text-base",
   };
 
-  const combinedClasses = `${baseClasses} ${disabled ? variantClasses['disabled'] : variantClasses[variant]} ${sizeClasses[size]} ${className}`;
+  const combinedClasses = `${baseClasses} ${
+    disabled ? variantClasses["disabled"] : variantClasses[variant]
+  } ${sizeClasses[size]} ${className}`;
 
   return (
     <button
