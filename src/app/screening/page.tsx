@@ -237,7 +237,7 @@ const ResumeScreeningTool: React.FC = () => {
 
     if (
       typeof response?.best_resume === "string" &&
-      response.best_resume?.toLowerCase().includes("error")
+      (response.best_resume as string)?.toLowerCase().includes("error")
     ) {
       setIsResumeUploadModalOpen(true);
     } else {
