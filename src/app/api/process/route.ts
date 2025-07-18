@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     }
 
     const response = await axios.post(
-      "http://35.198.248.218:8000/match_resume_d",
+      "http://34.47.164.179:8000/match_resume_d",
       uploadForm,
       { headers: uploadForm.getHeaders() }
     );
