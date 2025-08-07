@@ -1,7 +1,8 @@
 import React from "react";
-import { Candidate, ResumeAnalysis } from "@/types/matching";
+import { ResumeAnalysis } from "@/types/matching";
 import { useAppSelector } from "@/store/hooks";
 import Image from "next/image";
+import { buildInsight } from "@/utils/candidateUtils";
 
 interface CandidateDetailModalProps {
   isOpen: boolean;
@@ -16,16 +17,6 @@ const CandidateDetailModal: React.FC<CandidateDetailModalProps> = ({
 }) => {
   const formDataState = useAppSelector((state) => state.result.formData);
   if (!isOpen || !candidate) return null;
-
-  const buildInsight = (descriptionObj: Candidate): string => {
-    let combined = "";
-    for (const key of Object.keys(descriptionObj) as (keyof Candidate)[]) {
-      combined += `<strong>${key.replace(/_/g, " ")}:</strong> ${
-        descriptionObj[key]
-      }<br>`;
-    }
-    return combined;
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
